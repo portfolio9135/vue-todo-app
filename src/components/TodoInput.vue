@@ -5,8 +5,15 @@ import { statuses } from "../const/statuses";
 
 const input = ref("");
 const inputDate = ref("");
+const isErrMsg = ref(false);
 
-const onSubmitForm = () => {
+const onSubmitForm = (e) => {  
+  if (input.value == "" || inputDate.value == "") {
+    e.preventDefault();
+    isErrMsg.value = true;
+    return;
+  }
+
   // localStorageに保存されているデータは文字列形式(JSON形式)なので、JSON.parseで配列に変換する
   const items = JSON.parse(localStorage.getItem("items")) || [];
   const newItem = {
@@ -24,14 +31,14 @@ const onSubmitForm = () => {
 
 <template>
   <div>
+    <p v-if="isErrMsg">タスク・期限を両方入力してください</p>
     <form @submit="onSubmitForm">
       <label>やること<input type="text" v-model="input" /></label>
-      <label>期限<input type="date" v-model="inputDate"/></label>
+      <label>期限<input type="date" v-model="inputDate" /></label>
       <input type="submit" value="登録！" />
     </form>
-    
+
     <div>
-      <p>{{ input }}</p>
     </div>
   </div>
 </template>
