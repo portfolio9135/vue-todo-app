@@ -1,13 +1,19 @@
 <script setup>
+//【インポート】
 import { statuses } from '@/const/statuses';
 import { ref } from 'vue';
 
+//【変数定義】
 let items = ref(JSON.parse(localStorage.getItem("items")) || []);
 let inputContent = ref();//タスクの内容
 let inputLimit = ref();//タスクの期限
 let inputState = ref();//タスクの状態
-let isErrMsg = ref(false);
+let isErrMsg = ref(false);//エラーメッセージの表示を管理
+let isShowModal = ref(false);//モーダルの表示を管理
+let deleteItemId = ref();//削除するタスクのidを管理
+let deleteItemContent = ref();//削除するタスクの内容を管理
 
+//【メソッド定義】
 const onEdit = (id) => {
     inputContent.value = items.value[id].content;
     inputLimit.value = items.value[id].limit;
@@ -36,12 +42,36 @@ const onUpdate = (id) => {
     isErrMsg.value = false;
 }
 
+const showDeleteModal = (id) => {
+    isShowModal.value = true;
+    deleteItemId = id;
+    deleteItemContent = items.value[id].content
+}
+
+const onCloseModal = () => {
+    isShowModal.value = false;
+}
+
+const onDeleteItem = () => {
+    items.value.splice(deleteItemId, 1);
+
+    items.value = items.value.map((item, index) => ({
+        id: index,
+        content: item.content,
+        limit: item.limit,
+        state: item.state,
+        onEdit: item.onEdit,
+    }));
+
+    localStorage.setItem("items", JSON.stringify(items.value));
+
+    isShowModal.value = false;
+}
 </script>
 
 <template>
     <div>
         <p v-if="isErrMsg">タスク・期限を両方入力してください</p>
-
         <table>
             <tr>
                 <th class="th-id">ID</th>
@@ -74,9 +104,17 @@ const onUpdate = (id) => {
                     <button v-if="!item.onEdit" @click="onEdit(item.id)">編集</button>
                     <button v-else @click="onUpdate(item.id)">完了</button>
                 </td>
-                <td><button>削除</button></td>
+                <td><button @click="showDeleteModal(item.id)">削除</button></td>
             </tr>
         </table>
+
+        <div v-if="isShowModal" class="modal">
+            <div class="modal-content">
+                <p>「{{ deleteItemContent }}」を削除してもよろしいですか？</p>
+                <button @click="onDeleteItem()">はい</button>
+                <button @click="onCloseModal()">キャンセル</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -150,6 +188,45 @@ button.edit {
 }
 
 button.delete {
+    background-color: #f44336;
+    color: white;
+}
+
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-content button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content button:first-of-type {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.modal-content button:last-of-type {
     background-color: #f44336;
     color: white;
 }
