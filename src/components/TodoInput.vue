@@ -7,7 +7,7 @@ const input = ref("");
 const inputDate = ref("");
 const isErrMsg = ref(false);
 
-const onSubmitForm = (e) => {  
+const onSubmitForm = (e) => {
   if (input.value == "" || inputDate.value == "") {
     e.preventDefault();
     isErrMsg.value = true;
@@ -31,7 +31,7 @@ const onSubmitForm = (e) => {
 
 <template>
   <div>
-    <p v-if="isErrMsg">タスク・期限を両方入力してください</p>
+    <p class="c-red" v-if="isErrMsg">タスク・期限を両方入力してください</p>
     <form @submit="onSubmitForm">
       <label>やること<input type="text" v-model="input" /></label>
       <label>期限<input type="date" v-model="inputDate" /></label>
@@ -42,3 +42,9 @@ const onSubmitForm = (e) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.c-red {
+  color: red;
+}
+</style>

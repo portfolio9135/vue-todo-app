@@ -8,21 +8,40 @@ let items = ref(JSON.parse(localStorage.getItem("items")) || []);
 let inputContent = ref();//タスクの内容
 let inputLimit = ref();//タスクの期限
 let inputState = ref();//タスクの状態
+let errMsg = ref();//エラーメッセージの内容を管理
 let isErrMsg = ref(false);//エラーメッセージの表示を管理
 let isShowModal = ref(false);//モーダルの表示を管理
 let deleteItemId = ref();//削除するタスクのidを管理
 let deleteItemContent = ref();//削除するタスクの内容を管理
 
+
 //【メソッド定義】
 const onEdit = (id) => {
-    inputContent.value = items.value[id].content;
-    inputLimit.value = items.value[id].limit;
-    inputState.value = items.value[id].state;
-    items.value[id].onEdit = true;
+    //他に編集モードのタスクが無いか調べる
+    let isOnEditOther = false;
+
+    items.value.map((item) => {
+        if (item.onEdit) {
+            isOnEditOther = true;
+            return;
+        }
+    })
+
+    if (isOnEditOther) {
+        errMsg.value = "他に編集中のタスクがあります";
+        isErrMsg.value = true;
+        return;
+    } else {
+        inputContent.value = items.value[id].content;
+        inputLimit.value = items.value[id].limit;
+        inputState.value = items.value[id].state;
+        items.value[id].onEdit = true;
+    }
 }
 
 const onUpdate = (id) => {
     if (inputContent.value == "" || inputLimit.value == "") {
+        errMsg.value = "タスク・期限を両方入力してください"
         isErrMsg.value = true;
         return;
     }
@@ -71,7 +90,7 @@ const onDeleteItem = () => {
 
 <template>
     <div>
-        <p v-if="isErrMsg">タスク・期限を両方入力してください</p>
+        <p class="c-red mgT10" v-if="isErrMsg">{{ errMsg }}</p>
         <table>
             <tr>
                 <th class="th-id">ID</th>
@@ -119,6 +138,14 @@ const onDeleteItem = () => {
 </template>
 
 <style scoped>
+.c-red {
+    color: red;
+}
+
+.mgT10 {
+    margin-top: 10px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
