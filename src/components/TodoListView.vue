@@ -14,6 +14,8 @@ let isShowModal = ref(false);//モーダルの表示を管理
 let deleteItemId = ref();//削除するタスクのidを管理
 let deleteItemContent = ref();//削除するタスクの内容を管理
 
+const today = new Date();//今日の日付を定義
+
 
 //【メソッド定義】
 const onEdit = (id) => {
@@ -86,6 +88,16 @@ const onDeleteItem = () => {
 
     isShowModal.value = false;
 }
+
+const sortByLimit = () => {
+    items.value.sort((a, b) => new Date(a.limit) - new Date(b.limit));
+    localStorage.setItem("items", JSON.stringify(items.value));
+}
+
+const sortById = () => {
+    items.value.sort((a, b) => a.id - b.id);
+    localStorage.setItem("items", JSON.stringify(items.value));
+}
 </script>
 
 <template>
@@ -93,14 +105,18 @@ const onDeleteItem = () => {
         <p class="c-red mgT10" v-if="isErrMsg">{{ errMsg }}</p>
         <table>
             <tr>
-                <th class="th-id">ID</th>
+                <th class="th-id">ID<button class="mgL5" @click="sortById()">↓</button></th>
                 <th class="th-value">やること</th>
-                <th class="th-limit">期限</th>
+                <th class="th-limit">期限<button class="mgL5" @click="sortByLimit()">↓</button></th>
                 <th class="th-state">状態</th>
                 <th class="th-edit">編集</th>
                 <th class="th-delete">削除</th>
             </tr>
-            <tr v-for="item in items" :key="item.id">
+            <tr v-for="item in items" :key="item.id" :class="{ red: new Date(item.limit) < today }">
+
+                {{ console.log(item.limit)
+                 }}
+
                 <td>{{ item.id }}</td>
                 <td>
                     <span v-if="!item.onEdit">{{ item.content }}</span>
@@ -142,8 +158,15 @@ const onDeleteItem = () => {
     color: red;
 }
 
+.red {
+    color: red;
+}
+
 .mgT10 {
     margin-top: 10px;
+}
+.mgL5 {
+    margin-left: 5px;
 }
 
 table {
@@ -165,6 +188,7 @@ th {
     background-color: #009879;
     color: #ffffff;
     font-weight: bold;
+    
 }
 
 tr:nth-of-type(even) {
@@ -176,7 +200,7 @@ tr:hover {
 }
 
 .th-id {
-    width: 5%;
+    width: 10%;
 }
 
 .th-value {
@@ -184,7 +208,7 @@ tr:hover {
 }
 
 .th-limit {
-    width: 20%;
+    width: 30%;
 }
 
 .th-state {
